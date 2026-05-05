@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>DataBot</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#07090F;font-family:'Syne',sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:720px;margin:0 auto}
+
+/* HEADER */
+#hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #0f1820;flex-shrink:0;background:#07090F}
+#logo{width:34px;height:34px;border-radius:9px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);display:flex;align-items:center;justify-content:center;font-size:16px;color:#00D4FF}
+#brand{font-size:16px;font-weight:800;color:#e2e8f0}
+.bdg{font-size:9px;padding:2px 6px;border-radius:5px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:#00D4FF;font-family:'DM Mono',monospace;margin-left:6px;vertical-align:middle}
+#sub{font-size:10px;color:#2d3f55;font-family:'DM Mono',monospace;margin-top:1px}
+#clr{display:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:5px 10px;color:#2d3f55;font-size:11px;cursor:pointer}
+
+/* API BANNER */
+#apib{margin:8px 12px 0;padding:12px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.25);border-radius:10px;flex-shrink:0}
+#apib p{color:#6ee7b7;font-size:11px;font-family:'DM Mono',monospace;line-height:1.7;margin-bottom:8px}
+#apib strong{color:#34d399}
+#apirow{display:flex;gap:6px}
+#apikey{flex:1;background:rgba(0,0,0,.3);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:8px 10px;color:#e2e8f0;font-size:12px;font-family:'DM Mono',monospace;outline:none;min-width:0}
+#apisave{padding:8px 14px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);border-radius:8px;color:#34d399;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+
+/* TOPICS */
+#topics{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;border-bottom:1px solid #0f1820;flex-shrink:0;scrollbar-width:none}
+#topics::-webkit-scrollbar{display:none}
+.tp{padding:5px 11px;border-radius:20px;white-space:nowrap;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:#2d3f55;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0}
+
+/* QUICK */
+#qpanel{padding:8px 12px;border-bottom:1px solid #0f1820;display:none;flex-shrink:0}
+#qgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}
+.qb{padding:7px 9px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;color:#3d5068;font-size:11px;cursor:pointer;text-align:left;line-height:1.4}
+
+/* MESSAGES */
+#msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;min-height:0}
+#empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 10px}
+.sq{padding:8px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;color:#2d3f55;font-size:12px;cursor:pointer;text-align:left;width:100%;max-width:360px;margin-top:6px;line-height:1.45}
+.mr{display:flex;align-items:flex-end;gap:7px;animation:fu .25s ease}
+.mr.u{justify-content:flex-end}
+.av{width:26px;height:26px;flex-shrink:0;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px}
+.av.b{background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.3);color:#00D4FF;font-size:13px}
+.av.u{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.28);color:#a855f7}
+.bbl{max-width:85%;padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.65;word-break:break-word}
+.bbl.u{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);color:#b0c0d0;border-bottom-right-radius:3px}
+.bbl.b{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);color:#8899aa;border-bottom-left-radius:3px}
+
+/* THINKING */
+#thinking{display:none;align-items:flex-end;gap:7px}
+.dots{display:flex;gap:3px;align-items:center;height:16px;padding:11px 14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:13px;border-bottom-left-radius:3px}
+.dot{width:3px;border-radius:2px;background:#00D4FF;height:100%;transform-origin:center;animation:bar .75s ease-in-out infinite}
+
+/* VOICE STATUS */
+#vstatus{display:none;margin:0 10px 6px;padding:10px 12px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:10px;flex-shrink:0}
+#vtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+#vbars{display:flex;gap:2px;align-items:center;height:14px}
+.vb{width:3px;border-radius:2px;background:#00D4FF;height:100%;transform-origin:center;animation:bar .6s ease-in-out infinite}
+#stopbtn{padding:7px 14px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);border-radius:9px;color:#fca5a5;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+#livebox{min-height:34px;padding:7px 9px;background:rgba(0,0,0,.2);border-radius:7px;border:1px solid rgba(0,212,255,.1);color:#c5d0e0;font-size:12px;line-height:1.55;word-break:break-word}
+
+/* ERROR */
+#errbar{display:none;margin:0 10px 6px;padding:9px 12px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);border-radius:9px;flex-shrink:0;display:none}
+#errtxt{color:#fca5a5;font-size:11px;font-family:'DM Mono',monospace;line-height:1.5}
+
+/* INPUT */
+#ibar{padding:8px 10px 14px;border-top:1px solid #0f1820;background:#07090F;flex-shrink:0}
+#irow{display:flex;gap:8px;align-items:center}
+#micbtn{width:50px;height:50px;border-radius:50%;border:2px solid rgba(0,212,255,.4);background:rgba(0,212,255,.1);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;flex-shrink:0;transition:all .25s;-webkit-tap-highlight-color:transparent;outline:none;position:relative}
+#micbtn.on{border-color:rgba(239,68,68,.6);background:rgba(239,68,68,.15);box-shadow:0 0 18px rgba(239,68,68,.4)}
+#mring{position:absolute;inset:-5px;border-radius:50%;border:2px solid rgba(239,68,68,.4);animation:rp 1.4s ease-out infinite;pointer-events:none;display:none}
+#twrap{flex:1;display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.09);border-radius:13px;padding:0 8px 0 13px;min-height:46px;transition:border-color .2s}
+#txt{flex:1;background:transparent;border:none;color:#c5d0e0;font-size:13px;line-height:1.5;max-height:80px;overflow-y:auto;resize:none;outline:none;padding:10px 0;font-family:'Syne',sans-serif}
+#sndbtn{width:34px;height:34px;border-radius:9px;border:none;cursor:pointer;background:rgba(255,255,255,.05);color:#1e2a3a;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;opacity:.4;flex-shrink:0}
+#sndbtn.on{background:rgba(0,212,255,.3);color:#00D4FF;opacity:1}
+#hint{text-align:center;font-size:10px;color:#1a2535;font-family:'DM Mono',monospace;margin-top:6px}
+
+/* CODE */
+.cb{margin:8px 0;border-radius:7px;overflow:hidden;border:1px solid #1a2a3a}
+.cbl{padding:3px 10px;background:#0a1420;font-size:9px;color:#00D4FF;font-family:monospace;text-transform:uppercase;border-bottom:1px solid #1a2a3a;letter-spacing:.06em}
+pre{padding:10px;font-size:11px;line-height:1.6;color:#7DD3FC;font-family:monospace;overflow-x:auto;white-space:pre-wrap;word-break:break-word;background:#060e18;margin:0}
+code{background:rgba(0,212,255,.12);border-radius:3px;padding:1px 4px;font-size:11px;color:#00D4FF;font-family:monospace}
+strong{color:#e2e8f0;font-weight:700}
+
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bar{0%,100%{transform:scaleY(.15)}50%{transform:scaleY(1)}}
+@keyframes rp{0%{opacity:.6;transform:scale(1)}100%{opacity:0;transform:scale(2)}}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.2}}
+.cur{animation:bk 1s infinite;color:#00D4FF}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HEADER -->
+<div id="hdr">
+  <div style="display:flex;align-items:center;gap:9px">
+    <div id="logo">⬡</div>
+    <div>
+      <div><span id="brand">DataBot</span><span class="bdg">AI COACH</span></div>
+      <div id="sub">Data Analyst Interview Prep</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:7px">
+    <span id="qct" style="font-size:11px;color:#2d3f55;font-family:'DM Mono',monospace;display:none"></span>
+    <button id="clr" onclick="clearAll()">Clear</button>
+  </div>
+</div>
+
+<!-- API KEY BOX -->
+<div id="apib">
+  <p>🔑 <strong>One-time free setup:</strong><br>
+  1. Open <strong>aistudio.google.com</strong> in new tab<br>
+  2. Sign in Google → <strong>Get API key → Create API key</strong> → Copy<br>
+  3. Paste below → Save (stored only on your phone, never shared)</p>
+  <div id="apirow">
+    <input id="apikey" type="password" placeholder="Paste Gemini API key…"/>
+    <button id="apisave" onclick="saveKey()">Save ✓</button>
+  </div>
+</div>
+
+<!-- TOPICS -->
+<div id="topics"></div>
+
+<!-- QUICK PROMPTS -->
+<div id="qpanel">
+  <div style="font-size:10px;color:#2d3f55;font-family:'DM Mono',monospace;letter-spacing:.06em">QUICK QUESTIONS</div>
+  <div id="qgrid"></div>
+</div>
+
+<!-- MESSAGES -->
+<div id="msgs">
+  <div id="empty" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 10px">
+    <div style="font-size:36px;margin-bottom:8px">🎯</div>
+    <div style="color:#c5d0e0;font-size:14px;font-weight:700;margin-bottom:5px">Ready to coach you</div>
+    <div id="esub" style="color:#1e2a3a;font-size:11px;font-family:'DM Mono',monospace;line-height:1.6;max-width:280px">Save API key above, then tap 🎙 to speak</div>
+    <button class="sq" onclick="askS(this)">💡 Explain Type I and Type II errors</button>
+    <button class="sq" onclick="askS(this)">💡 When should I use t-test vs z-test?</button>
+    <button class="sq" onclick="askS(this)">💡 Write SQL to find top 5 customers by revenue</button>
+    <button class="sq" onclick="askS(this)">💡 How to calculate A/B test sample size?</button>
+  </div>
+  <div id="thinking" style="display:none">
+    <div class="av b">⬡</div>
+    <div class="dots">
+      <div class="dot" style="animation-delay:0s"></div>
+      <div class="dot" style="animation-delay:.1s"></div>
+      <div class="dot" style="animation-delay:.2s"></div>
+      <div class="dot" style="animation-delay:.3s"></div>
+      <div class="dot" style="animation-delay:.4s"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ERROR BAR -->
+<div id="errbar" style="display:none;margin:0 10px 6px;padding:9px 12px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);border-radius:9px;flex-shrink:0">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+    <span id="errtxt"></span>
+    <button onclick="document.getElementById('errbar').style.display='none'" style="background:none;border:none;color:#fca5a5;cursor:pointer;font-size:15px;flex-shrink:0">✕</button>
+  </div>
+</div>
+
+<!-- VOICE STATUS -->
+<div id="vstatus">
+  <div id="vtop">
+    <div style="display:flex;align-items:center;gap:7px">
+      <div id="vbars">
+        <div class="vb" style="animation-delay:0s"></div>
+        <div class="vb" style="animation-delay:.1s"></div>
+        <div class="vb" style="animation-delay:.2s"></div>
+        <div class="vb" style="animation-delay:.3s"></div>
+        <div class="vb" style="animation-delay:.4s"></div>
+      </div>
+      <span style="color:#00D4FF;font-size:13px;font-weight:700">Listening…</span>
+    </div>
+    <button id="stopbtn" onclick="stopMic()">⏹ Stop &amp; Send</button>
+  </div>
+  <div id="livebox" style="color:#2d3f55;font-family:'DM Mono',monospace;font-size:11px">Speak now… tap Stop &amp; Send when done</div>
+</div>
+
+<!-- INPUT BAR -->
+<div id="ibar">
+  <div id="irow">
+    <button id="micbtn" onclick="toggleMic()">
+      <div id="mring"></div>
+      <span id="mico">🎙️</span>
+    </button>
+    <div id="twrap">
+      <textarea id="txt" rows="1" placeholder="Or type your question…"
+        oninput="onTyping(this)"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doSend(document.getElementById('txt').value)}"></textarea>
+      <button id="sndbtn" onclick="doSend(document.getElementById('txt').value)">↑</button>
+    </div>
+  </div>
+  <div id="hint">🎙 Tap mic → speak → ⏹ Stop &amp; Send &nbsp;·&nbsp; or type → ↑</div>
+</div>
+
+</div><!-- end app -->
+
+<script>
+// ── SYSTEM PROMPT ──────────────────────────────────────────────
+const SYS = "You are DataBot, an expert data analyst interview coach. Give clear, structured, interview-focused answers with examples. For SQL or Python questions include code in triple backticks. End every answer with: **Follow-up:** [one question the interviewer might ask next]";
+
+// ── DATA ───────────────────────────────────────────────────────
+const TOPICS = [
+  {id:"statistics", label:"Statistics", icon:"📊", color:"#00D4FF"},
+  {id:"product",    label:"Product",    icon:"🎯", color:"#FF6B35"},
+  {id:"viz",        label:"Data Viz",   icon:"📈", color:"#A855F7"},
+  {id:"sql",        label:"SQL",        icon:"🗄️", color:"#10B981"},
+  {id:"python",     label:"Python",     icon:"🐍", color:"#F59E0B"},
+  {id:"abtesting",  label:"A/B Testing",icon:"⚗️", color:"#EC4899"},
+];
+const QUICK = {
+  statistics: ["Type I vs Type II errors","t-test vs z-test?","Central Limit Theorem","What is p-value?"],
+  product:    ["Measure a new feature","Diagnose 15% retention drop","Define DAU/MAU","North star metric?"],
+  viz:        ["Tableau vs Power BI vs Looker","Good dashboard design","LOD expressions in Tableau","Large data in Power BI"],
+  sql:        ["INNER vs LEFT JOIN","Query to find duplicates","What is a CTE?","Window functions explained"],
+  python:     ["Missing data in pandas","List comprehensions","apply() vs map()","Merge DataFrames"],
+  abtesting:  ["Calculate sample size","Statistical significance","Multiple testing problem","Bayesian vs frequentist"],
+};
+
+// ── STATE ──────────────────────────────────────────────────────
+let conv = [];
+let apiKey = localStorage.getItem("dgkey") || "";
+let activeTopic = null;
+let msgCount = 0;
+let recog = null;
+let isListening = false;
+let finalText = "";   // accumulated final-only transcript
+
+// ── API KEY ────────────────────────────────────────────────────
+(function init(){
+  if(apiKey){
+    document.getElementById("apib").style.display = "none";
+    document.getElementById("esub").textContent = "Tap 🎙 to speak your question";
+  }
+})();
+
+function saveKey(){
+  const v = document.getElementById("apikey").value.trim();
+  if(v.length < 8){ showErr("Key looks too short — please paste the full key."); return; }
+  apiKey = v;
+  localStorage.setItem("dgkey", apiKey);
+  document.getElementById("apib").style.display = "none";
+  document.getElementById("esub").textContent = "Tap 🎙 to speak your question";
+  hideErr();
+}
+document.getElementById("apikey").addEventListener("keydown", e => { if(e.key==="Enter") saveKey(); });
+
+// ── TOPICS ─────────────────────────────────────────────────────
+TOPICS.forEach(t => {
+  const b = document.createElement("button");
+  b.className = "tp"; b.dataset.id = t.id;
+  b.textContent = t.icon + " " + t.label;
+  b.onclick = () => toggleTopic(t);
+  document.getElementById("topics").appendChild(b);
+});
+
+function toggleTopic(t){
+  if(activeTopic === t.id){
+    activeTopic = null;
+    document.getElementById("qpanel").style.display = "none";
+    document.querySelectorAll(".tp").forEach(b => { b.style.background="rgba(255,255,255,.04)"; b.style.borderColor="rgba(255,255,255,.07)"; b.style.color="#2d3f55"; });
+  } else {
+    activeTopic = t.id;
+    document.querySelectorAll(".tp").forEach(b => {
+      const on = b.dataset.id === t.id;
+      b.style.background = on ? t.color+"20" : "rgba(255,255,255,.04)";
+      b.style.borderColor = on ? t.color+"55" : "rgba(255,255,255,.07)";
+      b.style.color = on ? t.color : "#2d3f55";
+    });
+    const g = document.getElementById("qgrid"); g.innerHTML = "";
+    QUICK[t.id].forEach(q => {
+      const b = document.createElement("button"); b.className = "qb";
+      b.textContent = q; b.onclick = () => doSend(q);
+      g.appendChild(b);
+    });
+    document.getElementById("qpanel").style.display = "block";
+  }
+}
+
+// ── FORMAT TEXT ────────────────────────────────────────────────
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function fmt(text){
+  return text.split(/(```[\s\S]*?```)/g).map(block => {
+    if(block.startsWith("```") && block.endsWith("```")){
+      const lines = block.slice(3,-3).split("\n");
+      const lang = lines[0].trim();
+      const code = lines.slice(1).join("\n").trim();
+      return `<div class="cb">${lang?`<div class="cbl">${lang}</div>`:""}<pre>${esc(code)}</pre></div>`;
+    }
+    return block.split("\n").map(line => {
+      if(!line.trim()) return "<div style='height:5px'></div>";
+      let h = esc(line);
+      h = h.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      h = h.replace(/`([^`]+)`/g, "<code>$1</code>");
+      if(line.trim().startsWith("- "))
+        return `<div style="display:flex;gap:7px;margin-bottom:3px"><span style="color:#00D4FF;flex-shrink:0">›</span><span>${h.replace(/^[-•]\s+/,"")}</span></div>`;
+      return `<div style="margin-bottom:4px;line-height:1.7">${h}</div>`;
+    }).join("");
+  }).join("");
+}
+
+// ── ADD MESSAGE ────────────────────────────────────────────────
+function addMsg(role, text){
+  document.getElementById("empty").style.display = "none";
+  const msgs = document.getElementById("msgs");
+  const row = document.createElement("div");
+  row.className = "mr " + (role==="user" ? "u" : "");
+  if(role === "user"){
+    row.innerHTML = `<div class="bbl u">${esc(text)}</div><div class="av u">U</div>`;
+    msgCount++;
+    const qct = document.getElementById("qct");
+    qct.textContent = msgCount + " Q&A";
+    qct.style.display = "inline";
+    document.getElementById("clr").style.display = "inline";
+  } else {
+    row.innerHTML = `<div class="av b">⬡</div><div class="bbl b">${fmt(text)}</div>`;
+  }
+  msgs.insertBefore(row, document.getElementById("thinking"));
+  // scroll to bottom
+  setTimeout(() => msgs.scrollTop = msgs.scrollHeight, 80);
+}
+
+// ── SEND & CALL GEMINI ─────────────────────────────────────────
+async function doSend(q){
+  q = (q || "").trim();
+  if(!q) return;
+  if(!apiKey){
+    document.getElementById("apib").style.display = "block";
+    showErr("Please save your free Gemini API key first.");
+    return;
+  }
+
+  // Clear input
+  const txtEl = document.getElementById("txt");
+  txtEl.value = ""; txtEl.style.height = "auto"; updSend();
+
+  addMsg("user", q);
+  document.getElementById("thinking").style.display = "flex";
+
+  // Build history for Gemini
+  const contents = [];
+  for(const m of conv){
+    contents.push({ role: m.role==="user" ? "user" : "model", parts:[{text:m.content}] });
+  }
+  contents.push({ role:"user", parts:[{text:q}] });
+  conv.push({ role:"user", content:q });
+
+  try{
+    const res = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey,
+      {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          system_instruction: { parts:[{text:SYS}] },
+          contents: contents,
+          generationConfig: { maxOutputTokens:800, temperature:0.7 }
+        })
+      }
+    );
+    const data = await res.json();
+    document.getElementById("thinking").style.display = "none";
+
+    if(data.error){
+      conv.pop();
+      if(data.error.code === 400 || data.error.code === 401 || data.error.code === 403){
+        apiKey = ""; localStorage.removeItem("dgkey");
+        document.getElementById("apib").style.display = "block";
+        showErr("API key invalid or expired. Please re-enter your Gemini key.");
+      } else {
+        showErr("API Error: " + data.error.message);
+      }
+      return;
+    }
+
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if(!reply){ showErr("Empty response from AI. Please try again."); conv.pop(); return; }
+
+    conv.push({ role:"assistant", content:reply });
+    addMsg("bot", reply);
+
+  } catch(err){
+    document.getElementById("thinking").style.display = "none";
+    conv.pop();
+    showErr("Network error: " + err.message + ". Check your internet.");
+  }
+}
+
+function askS(el){ doSend(el.textContent.replace("💡 ","")); }
+
+function clearAll(){
+  conv = []; msgCount = 0;
+  document.querySelectorAll(".mr").forEach(e => e.remove());
+  document.getElementById("empty").style.display = "flex";
+  document.getElementById("qct").style.display = "none";
+  document.getElementById("clr").style.display = "none";
+  document.getElementById("thinking").style.display = "none";
+}
+
+// ── TEXT INPUT ─────────────────────────────────────────────────
+function onTyping(el){
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 80) + "px";
+  updSend();
+}
+function updSend(){
+  const has = document.getElementById("txt").value.trim().length > 0;
+  document.getElementById("sndbtn").className = has ? "on" : "";
+  document.getElementById("twrap").style.borderColor = has ? "rgba(0,212,255,.4)" : "rgba(255,255,255,.09)";
+}
+
+// ── ERROR ──────────────────────────────────────────────────────
+function showErr(msg){
+  document.getElementById("errtxt").textContent = "⚠️ " + msg;
+  document.getElementById("errbar").style.display = "block";
+}
+function hideErr(){ document.getElementById("errbar").style.display = "none"; }
+
+// ── VOICE ──────────────────────────────────────────────────────
+// Fix 1: No sound — we use abort() not stop(), and never let it auto-close
+// Fix 2: No duplicates — we only accumulate isFinal results, interim is display-only
+// Fix 3: Manual stop only — no silence timer at all
+
+function toggleMic(){
+  if(isListening) stopMic();
+  else startMic();
+}
+
+function startMic(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ showErr("Voice needs Chrome browser."); return; }
+
+  hideErr();
+  finalText = "";
+  isListening = true;
+
+  // UI on
+  document.getElementById("micbtn").classList.add("on");
+  document.getElementById("mring").style.display = "block";
+  document.getElementById("mico").textContent = "⏹";
+  document.getElementById("vstatus").style.display = "block";
+  document.getElementById("livebox").textContent = "Speak now… tap Stop & Send when done";
+  document.getElementById("livebox").style.color = "#2d3f55";
+
+  recog = new SR();
+  recog.continuous = true;
+  recog.interimResults = true;
+  recog.lang = "en-US";
+  recog.maxAlternatives = 1;
+
+  recog.onresult = function(e){
+    // Accumulate ONLY final results — never accumulate interim
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      if(e.results[i].isFinal){
+        finalText += e.results[i][0].transcript + " ";
+      }
+    }
+    // For display: show finalText + latest interim only
+    let interim = "";
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      if(!e.results[i].isFinal) interim = e.results[i][0].transcript;
+    }
+    const display = (finalText + interim).trim();
+    const lb = document.getElementById("livebox");
+    lb.style.color = "#c5d0e0";
+    lb.textContent = display || "Speak now…";
+  };
+
+  recog.onerror = function(e){
+    if(e.error === "not-allowed" || e.error === "permission-denied"){
+      showErr("Mic blocked. Tap 🔒 in address bar → Site settings → Microphone → Allow.");
+    } else if(e.error === "no-speech"){
+      // do nothing, keep listening
+    } else if(e.error !== "aborted"){
+      showErr("Mic error: " + e.error);
+    }
+  };
+
+  // onend: only restart if we DIDN'T call abort (i.e., still listening)
+  recog.onend = function(){
+    if(isListening){
+      // Chrome stops after silence — restart automatically to keep listening
+      try { recog.start(); } catch(e){}
+    }
+  };
+
+  try { recog.start(); } catch(e){ showErr("Could not start mic: " + e.message); isListening = false; resetMicUI(); }
+}
+
+function stopMic(){
+  isListening = false;
+  try { recog.abort(); } catch(e){}
+  resetMicUI();
+  const q = finalText.trim();
+  finalText = "";
+  if(q) setTimeout(() => doSend(q), 100);
+}
+
+function resetMicUI(){
+  document.getElementById("micbtn").classList.remove("on");
+  document.getElementById("mring").style.display = "none";
+  document.getElementById("mico").textContent = "🎙️";
+  document.getElementById("vstatus").style.display = "none";
+  document.getElementById("livebox").textContent = "Speak now… tap Stop & Send when done";
+}
+</script>
+</body>
+</html>
